@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import {
   adminReleaseTeam,
   adminRenameTeam,
+  adminResetAll,
   fetchAdminOverview,
   setSubmissionHidden,
   type AdminOverview,
@@ -129,6 +130,34 @@ export function AdminPage() {
           >
             Mosaic
           </Link>
+          <button
+            type="button"
+            disabled={busyId === "reset-all"}
+            onClick={async () => {
+              if (
+                !window.confirm(
+                  "Reset the entire hunt? This clears all photos, releases every team, and resets all progress. This cannot be undone.",
+                )
+              ) {
+                return;
+              }
+              setBusyId("reset-all");
+              setError(null);
+              try {
+                await adminResetAll(getStoredAdminPasscode()!);
+                await refresh(getStoredAdminPasscode()!);
+              } catch (err) {
+                setError(
+                  err instanceof Error ? err.message : "Reset failed",
+                );
+              } finally {
+                setBusyId(null);
+              }
+            }}
+            className="inline-flex min-h-11 items-center rounded-xl bg-sp-red/10 px-3 text-sm font-semibold text-sp-red-dark disabled:opacity-50"
+          >
+            {busyId === "reset-all" ? "Resetting…" : "Reset all"}
+          </button>
           <button
             type="button"
             onClick={() => {
