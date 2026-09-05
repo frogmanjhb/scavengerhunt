@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Fraunces", Georgia, serif;
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --color-teal-950: #062e2c;
+  --color-teal-900: #0b4f4a;
+  --color-teal-800: #0f6b64;
+  --color-teal-700: #148078;
+  --color-gold-400: #f0b429;
+  --color-gold-300: #f7c948;
+  --color-sand-50: #f3f7f4;
+  --color-ink: #102a27;
+}
+
+:root {
+  color: #102a27;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(240, 180, 41, 0.22), transparent 55%),
+    radial-gradient(900px 500px at 100% 0%, rgba(20, 128, 120, 0.18), transparent 50%),
+    linear-gradient(180deg, #e8f3ef 0%, #f3f7f4 40%, #dff0ea 100%);
+  font-family: var(--font-sans);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+}
+
+#root {
+  min-height: 100dvh;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mosaic-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.45s ease-out both;
+}
+
+.animate-mosaic-in {
+  animation: mosaic-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.bg-mesh {
+  background-image:
+    linear-gradient(rgba(11, 79, 74, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(11, 79, 74, 0.04) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
