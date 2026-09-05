@@ -117,3 +117,23 @@ adminRouter.post("/teams/:id/release", async (req, res) => {
     return res.status(500).json({ error: "Failed to release team" });
   }
 });
+
+adminRouter.post("/reset", async (_req, res) => {
+  try {
+    await prisma.$transaction(async (tx) => {
+      await tx.submission.deleteMany({});
+      await tx.team.updateMany({
+        data: {
+          claimed: false,
+          name: null,
+          currentStep: 0,
+          startIndex: 0,
+        },
+      });
+    });
+    return res.json({ ok: true });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Failed to reset hunt" });
+  }
+});

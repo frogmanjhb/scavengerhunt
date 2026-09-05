@@ -178,3 +178,11 @@ export async function adminReleaseTeam(passcode: string, id: string) {
   });
   return parseJson(res);
 }
+
+export async function adminResetAll(passcode: string) {
+  const res = await fetch("/api/admin/reset", {
+    method: "POST",
+    headers: { "X-Admin-Passcode": passcode },
+  });
+  return parseJson<{ ok: boolean }>(res);
+}

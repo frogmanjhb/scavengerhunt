@@ -11,6 +11,7 @@ import {
   getStoredAdminPasscode,
   setStoredAdminPasscode,
 } from "../session";
+import { SchoolLogo } from "../components/SchoolLogo";
 
 export function AdminPage() {
   const [passcode, setPasscode] = useState(getStoredAdminPasscode() || "");
@@ -70,19 +71,20 @@ export function AdminPage() {
       <div className="bg-mesh mx-auto flex min-h-dvh max-w-md items-center px-4">
         <form
           onSubmit={onUnlock}
-          className="w-full rounded-3xl bg-white/90 p-6 shadow-sm ring-1 ring-teal-900/10"
+          className="w-full rounded-3xl bg-white/90 p-6 shadow-sm ring-2 ring-sp-red/10"
         >
-          <h1 className="font-[family-name:var(--font-display)] text-2xl text-teal-950">
+          <SchoolLogo variant="navy" size="sm" className="mx-auto" />
+          <h1 className="mt-4 text-center font-[family-name:var(--font-display)] text-2xl text-navy-950">
             Organiser access
           </h1>
-          <p className="mt-2 text-sm text-teal-900/70">
+          <p className="mt-2 text-center text-sm text-navy-800/70">
             Enter the shared admin passcode to unlock live oversight.
           </p>
           <input
             type="password"
             value={passcode}
             onChange={(e) => setPasscode(e.target.value)}
-            className="mt-5 min-h-12 w-full rounded-2xl border border-teal-900/15 px-4 outline-none focus:ring-2 focus:ring-gold-400/40"
+            className="mt-5 min-h-12 w-full rounded-2xl border border-navy-900/15 px-4 outline-none focus:ring-2 focus:ring-sp-gold/50"
             placeholder="Passcode"
             required
           />
@@ -91,7 +93,7 @@ export function AdminPage() {
           ) : null}
           <button
             type="submit"
-            className="mt-5 flex min-h-12 w-full items-center justify-center rounded-2xl bg-teal-900 font-semibold text-white"
+            className="mt-5 flex min-h-12 w-full items-center justify-center rounded-2xl bg-sp-red font-semibold text-white hover:bg-sp-red-dark"
           >
             Unlock
           </button>
@@ -103,13 +105,16 @@ export function AdminPage() {
   return (
     <div className="bg-mesh mx-auto min-h-dvh max-w-5xl px-4 py-8">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="font-[family-name:var(--font-display)] text-3xl text-teal-950">
-            Admin overview
-          </h1>
-          <p className="mt-1 text-sm text-teal-900/70">
-            Live progress and quiet corrective levers.
-          </p>
+        <div className="flex flex-wrap items-center gap-4">
+          <SchoolLogo variant="navy" size="sm" />
+          <div>
+            <h1 className="font-[family-name:var(--font-display)] text-3xl text-navy-950">
+              Admin overview
+            </h1>
+            <p className="mt-1 text-sm text-navy-800/70">
+              Live progress and quiet corrective levers.
+            </p>
+          </div>
         </div>
         <button
           type="button"
@@ -117,7 +122,7 @@ export function AdminPage() {
             clearStoredAdminPasscode();
             setUnlocked(false);
           }}
-          className="text-sm text-teal-800/70 underline-offset-2 hover:underline"
+          className="text-sm text-navy-800/70 underline-offset-2 hover:underline"
         >
           Lock
         </button>
@@ -144,24 +149,24 @@ export function AdminPage() {
           </div>
 
           <section className="mb-8">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-teal-800/70">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-sp-red">
               Team progress
             </h2>
-            <div className="overflow-hidden rounded-2xl bg-white/85 ring-1 ring-teal-900/10">
-              <ul className="divide-y divide-teal-900/10">
+            <div className="overflow-hidden rounded-2xl bg-white/85 ring-1 ring-navy-900/10">
+              <ul className="divide-y divide-navy-900/10">
                 {overview.teams.map((team) => (
                   <li
                     key={team.id}
                     className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div>
-                      <p className="font-semibold text-teal-950">
+                      <p className="font-semibold text-navy-950">
                         #{team.number}{" "}
-                        <span className="font-medium text-teal-900/80">
+                        <span className="font-medium text-navy-900/80">
                           {team.name || (team.claimed ? "Unnamed" : "Unclaimed")}
                         </span>
                       </p>
-                      <p className="text-xs text-teal-900/55">
+                      <p className="text-xs text-navy-900/55">
                         {team.claimed
                           ? `${team.completed}/10${team.finished ? " · finished" : ""}`
                           : "Available"}
@@ -197,7 +202,7 @@ export function AdminPage() {
                                 setBusyId(null);
                               }
                             }}
-                            className="min-h-10 rounded-xl bg-teal-900/8 px-3 text-sm font-medium text-teal-900"
+                            className="min-h-10 rounded-xl bg-navy-900/8 px-3 text-sm font-medium text-navy-900"
                           >
                             Rename
                           </button>
@@ -229,7 +234,7 @@ export function AdminPage() {
                                 setBusyId(null);
                               }
                             }}
-                            className="min-h-10 rounded-xl bg-gold-300/30 px-3 text-sm font-medium text-teal-950"
+                            className="min-h-10 rounded-xl bg-sp-gold/35 px-3 text-sm font-medium text-navy-950"
                           >
                             Release
                           </button>
@@ -243,14 +248,14 @@ export function AdminPage() {
           </section>
 
           <section>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-teal-800/70">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-sp-red">
               Recent submissions
             </h2>
             <div className="grid gap-3 sm:grid-cols-2">
               {overview.recentSubmissions.map((sub) => (
                 <article
                   key={sub.id}
-                  className="overflow-hidden rounded-2xl bg-white/85 ring-1 ring-teal-900/10"
+                  className="overflow-hidden rounded-2xl bg-white/85 ring-1 ring-navy-900/10"
                 >
                   <img
                     src={sub.photoUrl}
@@ -258,8 +263,8 @@ export function AdminPage() {
                     className={`h-40 w-full object-cover ${sub.hidden ? "opacity-40" : ""}`}
                   />
                   <div className="p-3">
-                    <p className="font-semibold text-teal-950">{sub.teamName}</p>
-                    <p className="text-xs text-teal-900/55">
+                    <p className="font-semibold text-navy-950">{sub.teamName}</p>
+                    <p className="text-xs text-navy-900/55">
                       Spot {sub.locationOrderIndex + 1}
                       {sub.hidden ? " · hidden from mosaic" : ""}
                     </p>
@@ -283,7 +288,7 @@ export function AdminPage() {
                           setBusyId(null);
                         }
                       }}
-                      className="mt-3 min-h-10 rounded-xl bg-teal-900 px-3 text-sm font-semibold text-white"
+                      className="mt-3 min-h-10 rounded-xl bg-sp-red px-3 text-sm font-semibold text-white hover:bg-sp-red-dark"
                     >
                       {sub.hidden ? "Unhide" : "Hide from mosaic"}
                     </button>
@@ -294,7 +299,7 @@ export function AdminPage() {
           </section>
         </>
       ) : (
-        <p className="text-teal-900/70">Loading overview…</p>
+        <p className="text-navy-800/70">Loading overview…</p>
       )}
     </div>
   );
@@ -302,11 +307,11 @@ export function AdminPage() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl bg-white/85 px-4 py-3 ring-1 ring-teal-900/10">
-      <p className="text-xs font-semibold uppercase tracking-wider text-teal-800/60">
+    <div className="rounded-2xl bg-white/85 px-4 py-3 ring-1 ring-navy-900/10">
+      <p className="text-xs font-semibold uppercase tracking-wider text-sp-red/80">
         {label}
       </p>
-      <p className="mt-1 font-[family-name:var(--font-display)] text-2xl text-teal-950">
+      <p className="mt-1 font-[family-name:var(--font-display)] text-2xl text-navy-950">
         {value}
       </p>
     </div>

@@ -1,21 +1,28 @@
 import { Link } from "react-router-dom";
+import { SchoolLogo } from "./SchoolLogo";
 
 type AppHeaderProps = {
   subtitle?: string;
   showContinue?: boolean;
+  compact?: boolean;
 };
 
-export function AppHeader({ subtitle, showContinue }: AppHeaderProps) {
+export function AppHeader({ subtitle, showContinue, compact }: AppHeaderProps) {
   return (
     <header className="animate-fade-up mb-6 text-center">
-      <p className="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-teal-800/70">
+      <SchoolLogo
+        variant="navy"
+        size={compact ? "sm" : "lg"}
+        className="mx-auto drop-shadow-sm"
+      />
+      <p className="mt-4 text-xs font-semibold uppercase tracking-[0.22em] text-navy-700/70">
         Staff morning · outdoor hunt
       </p>
-      <h1 className="font-[family-name:var(--font-display)] text-[1.85rem] leading-tight text-teal-950 sm:text-4xl">
+      <h1 className="mt-2 font-[family-name:var(--font-display)] text-[1.85rem] leading-tight text-navy-950 sm:text-4xl">
         The One Where We Had A Scavenger Hunt
       </h1>
       {subtitle ? (
-        <p className="mx-auto mt-3 max-w-md text-sm text-teal-900/75 sm:text-base">
+        <p className="mx-auto mt-3 max-w-md text-sm text-navy-800/75 sm:text-base">
           {subtitle}
         </p>
       ) : null}
@@ -23,7 +30,7 @@ export function AppHeader({ subtitle, showContinue }: AppHeaderProps) {
         <p className="mt-4">
           <Link
             to="/play"
-            className="inline-flex min-h-11 items-center justify-center rounded-full bg-teal-900 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800"
+            className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-sp-red px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-sp-red-dark"
           >
             Continue your hunt
           </Link>

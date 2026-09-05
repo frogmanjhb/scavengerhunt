@@ -7,6 +7,7 @@ import {
 } from "../api";
 import { compressPhoto } from "../compress";
 import { clearStoredTeamId, getStoredTeamId } from "../session";
+import { SchoolLogo } from "../components/SchoolLogo";
 
 type UploadState = "idle" | "compressing" | "uploading" | "accepted" | "error";
 
@@ -88,38 +89,41 @@ export function PlayPage() {
   return (
     <div className="bg-mesh mx-auto min-h-dvh max-w-lg px-4 py-8">
       <div className="mb-6 text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-800/70">
+        <SchoolLogo variant="navy" size="sm" className="mx-auto" />
+        <p className="mt-3 text-xs font-semibold uppercase tracking-[0.2em] text-sp-red">
           Team {teamNumber} · {progress}
         </p>
-        <h1 className="mt-2 font-[family-name:var(--font-display)] text-3xl text-teal-950">
+        <h1 className="mt-2 font-[family-name:var(--font-display)] text-3xl text-navy-950">
           {teamName}
         </h1>
       </div>
 
       {question ? (
-        <section className="animate-fade-up rounded-3xl bg-white/90 p-6 shadow-sm ring-1 ring-teal-900/10">
-          <p className="text-xs font-semibold uppercase tracking-wider text-gold-400">
+        <section className="animate-fade-up relative overflow-hidden rounded-3xl bg-white/90 p-6 shadow-sm ring-2 ring-sp-gold/40">
+          <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-sp-red/10" />
+          <div className="pointer-events-none absolute -bottom-8 -left-4 h-20 w-20 rounded-full bg-sp-gold/20" />
+          <p className="relative text-xs font-semibold uppercase tracking-wider text-sp-gold">
             Your clue
           </p>
-          <p className="mt-3 text-lg leading-relaxed text-teal-950">
+          <p className="relative mt-3 text-lg leading-relaxed text-navy-950">
             {question.clueText}
           </p>
-          <p className="mt-4 text-sm text-teal-900/65">
+          <p className="relative mt-4 text-sm text-navy-800/65">
             Get everyone in the shot — and make sure your name sign is visible.
           </p>
         </section>
       ) : (
-        <p className="text-center text-teal-900/70">Loading your question…</p>
+        <p className="text-center text-navy-800/70">Loading your question…</p>
       )}
 
       <div className="mt-6 animate-fade-up">
         <label
           className={`flex min-h-14 cursor-pointer items-center justify-center rounded-2xl px-4 text-base font-semibold transition ${
             uploadState === "compressing" || uploadState === "uploading"
-              ? "bg-teal-900/40 text-white"
+              ? "bg-sp-red/40 text-white"
               : uploadState === "accepted"
-                ? "bg-teal-700 text-white"
-                : "bg-teal-900 text-white hover:bg-teal-800"
+                ? "bg-navy-800 text-white"
+                : "bg-sp-red text-white hover:bg-sp-red-dark"
           }`}
         >
           <input
@@ -148,7 +152,7 @@ export function PlayPage() {
           <img
             src={previewUrl}
             alt="Upload preview"
-            className="mt-4 max-h-56 w-full rounded-2xl object-cover ring-1 ring-teal-900/10"
+            className="mt-4 max-h-56 w-full rounded-2xl object-cover ring-1 ring-navy-900/10"
           />
         ) : null}
 
@@ -165,11 +169,11 @@ export function PlayPage() {
           clearStoredTeamId();
           navigate("/");
         }}
-        className="mt-8 block w-full text-center text-xs text-teal-900/45 underline-offset-2 hover:underline"
+        className="mt-8 block w-full text-center text-xs text-navy-900/45 underline-offset-2 hover:underline"
       >
         Switch device / leave session
       </button>
-      <p className="mt-2 text-center text-xs text-teal-900/40">
+      <p className="mt-2 text-center text-xs text-navy-900/40">
         <Link to="/">Team grid</Link>
       </p>
     </div>

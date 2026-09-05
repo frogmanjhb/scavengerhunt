@@ -3,22 +3,29 @@
 @theme {
   --font-display: "Fraunces", Georgia, serif;
   --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
-  --color-teal-950: #062e2c;
-  --color-teal-900: #0b4f4a;
-  --color-teal-800: #0f6b64;
-  --color-teal-700: #148078;
-  --color-gold-400: #f0b429;
-  --color-gold-300: #f7c948;
-  --color-sand-50: #f3f7f4;
-  --color-ink: #102a27;
+
+  --color-sp-red: #e61e26;
+  --color-sp-red-dark: #c4181f;
+  --color-sp-gold: #f5c518;
+  --color-sp-gold-soft: #ffe066;
+
+  --color-navy-950: #0b1a33;
+  --color-navy-900: #122547;
+  --color-navy-800: #1a335c;
+  --color-navy-700: #274575;
+  --color-navy-100: #e8eef7;
+  --color-navy-50: #f3f6fb;
+
+  --color-ink: #0b1a33;
 }
 
 :root {
-  color: #102a27;
+  color: #0b1a33;
   background:
-    radial-gradient(1200px 600px at 10% -10%, rgba(240, 180, 41, 0.22), transparent 55%),
-    radial-gradient(900px 500px at 100% 0%, rgba(20, 128, 120, 0.18), transparent 50%),
-    linear-gradient(180deg, #e8f3ef 0%, #f3f7f4 40%, #dff0ea 100%);
+    radial-gradient(1000px 520px at 8% -8%, rgba(230, 30, 38, 0.14), transparent 55%),
+    radial-gradient(900px 480px at 100% 0%, rgba(245, 197, 24, 0.2), transparent 50%),
+    radial-gradient(700px 400px at 50% 100%, rgba(18, 37, 71, 0.06), transparent 55%),
+    linear-gradient(180deg, #fff8e8 0%, #fff5f4 42%, #eef3fb 100%);
   font-family: var(--font-sans);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -60,6 +67,22 @@ body {
   }
 }
 
+@keyframes key-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-6deg);
+  }
+  50% {
+    transform: translateY(-4px) rotate(-2deg);
+  }
+}
+
+@keyframes trail-dash {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
 .animate-fade-up {
   animation: fade-up 0.45s ease-out both;
 }
@@ -68,9 +91,18 @@ body {
   animation: mosaic-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+.animate-key-bob {
+  animation: key-bob 2.4s ease-in-out infinite;
+}
+
 .bg-mesh {
   background-image:
-    linear-gradient(rgba(11, 79, 74, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(11, 79, 74, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(18, 37, 71, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(18, 37, 71, 0.035) 1px, transparent 1px);
   background-size: 28px 28px;
+}
+
+.hunt-path {
+  stroke-dasharray: 6 6;
+  animation: trail-dash 1.2s linear infinite;
 }

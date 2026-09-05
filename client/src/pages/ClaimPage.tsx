@@ -51,17 +51,20 @@ export function ClaimPage() {
 
   return (
     <div className="bg-mesh mx-auto min-h-dvh max-w-lg px-4 py-8">
-      <AppHeader subtitle="Choose a team name that matches the name sign you designed. It will appear on the live mosaic." />
+      <AppHeader
+        compact
+        subtitle="Choose a team name that matches the name sign you designed. It will appear on the live mosaic."
+      />
 
       <form
         onSubmit={onSubmit}
-        className="animate-fade-up rounded-3xl bg-white/85 p-6 shadow-sm ring-1 ring-teal-900/10"
+        className="animate-fade-up rounded-3xl bg-white/90 p-6 shadow-sm ring-2 ring-sp-red/10"
       >
-        <p className="text-sm font-semibold uppercase tracking-wider text-teal-800/70">
+        <p className="text-sm font-semibold uppercase tracking-wider text-sp-red">
           Team {teamNumber ?? "…"}
         </p>
         <label className="mt-4 block">
-          <span className="mb-2 block text-sm font-medium text-teal-950">
+          <span className="mb-2 block text-sm font-medium text-navy-950">
             Team name
           </span>
           <input
@@ -70,7 +73,7 @@ export function ClaimPage() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. The Coffee Club"
-            className="min-h-12 w-full rounded-2xl border border-teal-900/15 bg-sand-50 px-4 text-base outline-none ring-gold-400/0 transition focus:border-teal-700 focus:ring-2 focus:ring-gold-400/40"
+            className="min-h-12 w-full rounded-2xl border border-navy-900/15 bg-navy-50 px-4 text-base outline-none transition focus:border-sp-red focus:ring-2 focus:ring-sp-gold/50"
           />
         </label>
 
@@ -83,14 +86,14 @@ export function ClaimPage() {
         <button
           type="submit"
           disabled={submitting || !name.trim() || Boolean(error)}
-          className="mt-6 flex min-h-12 w-full items-center justify-center rounded-2xl bg-teal-900 text-base font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50"
+          className="mt-6 flex min-h-12 w-full items-center justify-center rounded-2xl bg-sp-red text-base font-semibold text-white transition hover:bg-sp-red-dark disabled:cursor-not-allowed disabled:opacity-50"
         >
           {submitting ? "Claiming…" : "Claim team & start"}
         </button>
 
         <Link
           to="/"
-          className="mt-4 block text-center text-sm text-teal-800/70 underline-offset-2 hover:underline"
+          className="mt-4 block text-center text-sm text-navy-800/70 underline-offset-2 hover:underline"
         >
           Back to team grid
         </Link>

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { fetchRecentSubmissions, type MosaicSubmission } from "../api";
+import { SchoolLogo } from "../components/SchoolLogo";
 
 export function DisplayPage() {
   const [items, setItems] = useState<MosaicSubmission[]>([]);
@@ -72,17 +73,20 @@ export function DisplayPage() {
   );
 
   return (
-    <div className="min-h-dvh bg-teal-950 text-white">
+    <div className="min-h-dvh bg-navy-950 text-white">
       <div className="relative overflow-hidden px-6 py-5">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(240,180,41,0.25),transparent_40%),radial-gradient(circle_at_80%_0%,rgba(20,128,120,0.35),transparent_45%)]" />
-        <div className="relative flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold-300/80">
-              Live mosaic
-            </p>
-            <h1 className="mt-1 font-[family-name:var(--font-display)] text-2xl sm:text-4xl">
-              {title}
-            </h1>
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(230,30,38,0.35),transparent_40%),radial-gradient(circle_at_80%_0%,rgba(245,197,24,0.22),transparent_45%)]" />
+        <div className="relative flex flex-wrap items-end justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-4">
+            <SchoolLogo variant="white" size="sm" />
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-sp-gold">
+                Live mosaic
+              </p>
+              <h1 className="mt-1 font-[family-name:var(--font-display)] text-2xl sm:text-4xl">
+                {title}
+              </h1>
+            </div>
           </div>
           <p className="text-sm text-white/60">{items.length} photos</p>
         </div>
@@ -100,7 +104,7 @@ export function DisplayPage() {
           {items.map((item, index) => (
             <figure
               key={item.id}
-              className="animate-mosaic-in mb-3 break-inside-avoid overflow-hidden rounded-xl bg-teal-900/60 ring-1 ring-white/10"
+              className="animate-mosaic-in mb-3 break-inside-avoid overflow-hidden rounded-xl bg-navy-900/60 ring-1 ring-white/10"
               style={{ animationDelay: `${Math.min(index % 8, 7) * 40}ms` }}
             >
               <img
@@ -110,7 +114,7 @@ export function DisplayPage() {
                 loading="lazy"
               />
               <figcaption className="space-y-0.5 px-3 py-2">
-                <p className="text-sm font-medium text-gold-300">{item.teamName}</p>
+                <p className="text-sm font-medium text-sp-gold">{item.teamName}</p>
                 {item.caption ? (
                   <p className="text-xs leading-snug text-white/70">{item.caption}</p>
                 ) : null}
