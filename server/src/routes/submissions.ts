@@ -40,7 +40,7 @@ submissionsRouter.get("/recent", async (req, res) => {
       submissions.map((s) => ({
         id: s.id,
         photoUrl: s.photoUrl,
-        caption: s.caption,
+        caption: s.location.clueText,
         createdAt: s.createdAt,
         teamNumber: s.team.number,
         teamName: s.team.name || `Team ${s.team.number}`,
@@ -103,7 +103,7 @@ submissionsRouter.post("/", upload.single("photo"), async (req, res) => {
             teamId: team.id,
             locationId: location.id,
             photoUrl,
-            caption: team.name || `Team ${team.number}`,
+            caption: location.clueText,
           },
         });
 

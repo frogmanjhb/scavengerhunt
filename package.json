@@ -4,13 +4,13 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "concurrently -n server,client -c teal,gold \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
-    "build": "npm run build --prefix client && npm run build --prefix server",
-    "start": "npm run start --prefix server",
+    "setup": "npm install --prefix server --include=dev && npm install --prefix client --include=dev",
+    "build": "npm run setup && npm run db:generate && npm run build --prefix client && npm run build --prefix server",
+    "start": "cd server && npx prisma migrate deploy && node dist/index.js",
     "seed": "npm run seed --prefix server",
     "db:generate": "npm run db:generate --prefix server",
     "db:migrate": "npm run db:migrate --prefix server",
-    "db:push": "npm run db:push --prefix server",
-    "setup": "npm install --prefix server && npm install --prefix client"
+    "db:push": "npm run db:push --prefix server"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

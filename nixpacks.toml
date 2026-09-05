@@ -1,0 +1,12 @@
+# Install all workspace packages (including TypeScript/Vite) during build
+[phases.setup]
+nixPkgs = ["nodejs_22", "npm-9_x"]
+
+[phases.install]
+cmds = ["NPM_CONFIG_PRODUCTION=false npm install", "NPM_CONFIG_PRODUCTION=false npm run setup"]
+
+[phases.build]
+cmds = ["npm run db:generate", "npm run build --prefix client", "npm run build --prefix server"]
+
+[start]
+cmd = "npm start"

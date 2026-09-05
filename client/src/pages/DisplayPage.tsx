@@ -105,12 +105,15 @@ export function DisplayPage() {
             >
               <img
                 src={item.photoUrl}
-                alt={item.teamName}
+                alt={`${item.teamName}${item.caption ? `: ${item.caption}` : ""}`}
                 className="block w-full object-cover"
                 loading="lazy"
               />
-              <figcaption className="px-3 py-2 text-sm font-medium text-gold-300">
-                {item.teamName}
+              <figcaption className="space-y-0.5 px-3 py-2">
+                <p className="text-sm font-medium text-gold-300">{item.teamName}</p>
+                {item.caption ? (
+                  <p className="text-xs leading-snug text-white/70">{item.caption}</p>
+                ) : null}
               </figcaption>
             </figure>
           ))}

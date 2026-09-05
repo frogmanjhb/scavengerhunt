@@ -1,7 +1,6 @@
 [build]
-builder = "NIXPACKS"
-buildCommand = "npm install && npm run setup && npm run db:generate && npm run build"
+buildCommand = "NPM_CONFIG_PRODUCTION=false npm install && npm run build"
 
 [deploy]
-startCommand = "cd server && npx prisma migrate deploy && NODE_ENV=production node dist/index.js"
+startCommand = "npm start"
 restartPolicyType = "ON_FAILURE"
