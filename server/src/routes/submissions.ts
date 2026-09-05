@@ -7,6 +7,7 @@ import {
   prisma,
 } from "../db.js";
 import { getLeaderboard } from "../leaderboard.js";
+import { photoCaptionForOrderIndex } from "../locations.js";
 import { uploadPhoto } from "../supabase.js";
 
 export const submissionsRouter = Router();
@@ -33,7 +34,7 @@ submissionsRouter.get("/recent", async (req, res) => {
       orderBy: { createdAt: "asc" },
       include: {
         team: { select: { number: true, name: true } },
-        location: { select: { orderIndex: true, clueText: true } },
+        location: { select: { orderIndex: true } },
       },
     });
 
@@ -41,7 +42,7 @@ submissionsRouter.get("/recent", async (req, res) => {
       submissions.map((s) => ({
         id: s.id,
         photoUrl: s.photoUrl,
-        caption: s.location.clueText,
+        caption: photoCaptionForOrderIndex(s.location.orderIndex),
         createdAt: s.createdAt,
         teamNumber: s.team.number,
         teamName: s.team.name || `Team ${s.team.number}`,
@@ -104,7 +105,7 @@ submissionsRouter.post("/", upload.single("photo"), async (req, res) => {
             teamId: team.id,
             locationId: location.id,
             photoUrl,
-            caption: location.clueText,
+            caption: photoCaptionForOrderIndex(location.orderIndex),
           },
         });
 

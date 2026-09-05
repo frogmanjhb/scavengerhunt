@@ -8,6 +8,7 @@ import {
 } from "../api";
 import { compressPhoto } from "../compress";
 import { clearStoredTeamId, getStoredTeamId } from "../session";
+import { ConfettiBurst } from "../components/ConfettiBurst";
 import { Leaderboard } from "../components/Leaderboard";
 import { SchoolLogo } from "../components/SchoolLogo";
 
@@ -26,6 +27,7 @@ export function PlayPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[] | null>(
     null,
   );
+  const [confettiKey, setConfettiKey] = useState(0);
 
   const loadQuestion = useCallback(async () => {
     if (!teamId) return;
@@ -67,6 +69,7 @@ export function PlayPage() {
       setUploadState("uploading");
       const result = await uploadSubmission(teamId, compressed);
       setLeaderboard(result.leaderboard);
+      setConfettiKey((k) => k + 1);
       setUploadState("accepted");
 
       if (result.finished) {
@@ -109,7 +112,8 @@ export function PlayPage() {
       </div>
 
       {uploadState === "accepted" && leaderboard ? (
-        <section className="space-y-4">
+        <section className="relative space-y-4">
+          <ConfettiBurst burstKey={confettiKey} />
           <div className="animate-fade-up rounded-3xl bg-navy-800 px-5 py-4 text-center text-white">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sp-gold">
               Photo accepted

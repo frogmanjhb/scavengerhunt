@@ -93,6 +93,53 @@ body {
   }
 }
 
+@keyframes confetti-burst {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(0.4);
+  }
+  12% {
+    opacity: 1;
+    transform: translate3d(
+        calc(var(--confetti-drift) * 0.35),
+        -28vh,
+        0
+      )
+      rotate(calc(var(--confetti-spin) * 0.25)) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--confetti-drift), 58vh, 0)
+      rotate(var(--confetti-spin)) scale(0.85);
+  }
+}
+
+.confetti-piece {
+  position: absolute;
+  display: block;
+  animation-name: confetti-burst;
+  animation-timing-function: cubic-bezier(0.16, 0.84, 0.34, 1);
+  animation-fill-mode: forwards;
+  will-change: transform, opacity;
+}
+
+.confetti-circle {
+  border-radius: 999px;
+}
+
+.confetti-square {
+  border-radius: 2px;
+}
+
+.confetti-rect {
+  border-radius: 1px;
+}
+
+.confetti-dot {
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25);
+}
+
 .animate-fade-up {
   animation: fade-up 0.45s ease-out both;
 }

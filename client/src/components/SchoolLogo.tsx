@@ -16,9 +16,7 @@ export function SchoolLogo({
   size = "md",
 }: SchoolLogoProps) {
   const src =
-    variant === "white"
-      ? "/logos/sp-prep-logo-white.png"
-      : "/logos/sp-prep-logo-navy.png";
+    variant === "white" ? "/logos/white.png" : "/logos/navy.png";
 
   return (
     <img
