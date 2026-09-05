@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import cors from "cors";
 import express from "express";
 import { adminRouter } from "./routes/admin.js";
+import { leaderboardRouter } from "./routes/leaderboard.js";
 import { submissionsRouter } from "./routes/submissions.js";
 import { teamsRouter } from "./routes/teams.js";
 
@@ -27,6 +28,7 @@ app.get("/api/health", (_req, res) => {
 
 app.use("/api/teams", teamsRouter);
 app.use("/api/submissions", submissionsRouter);
+app.use("/api/leaderboard", leaderboardRouter);
 app.use("/api/admin", adminRouter);
 
 if (isProd) {

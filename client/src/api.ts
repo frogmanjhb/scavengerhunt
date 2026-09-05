@@ -46,6 +46,17 @@ export type MosaicSubmission = {
   locationOrderIndex: number;
 };
 
+export type LeaderboardEntry = {
+  rank: number;
+  id: string;
+  number: number;
+  name: string;
+  completed: number;
+  total: number;
+  finished: boolean;
+  lastSubmissionAt: string | null;
+};
+
 export type AdminOverview = {
   finishedCount: number;
   totalTeams: number;
@@ -116,6 +127,7 @@ export async function uploadSubmission(teamId: string, photo: Blob) {
     submissionId: string;
     photoUrl: string;
     nextQuestion?: QuestionPayload | null;
+    leaderboard: LeaderboardEntry[];
     team: {
       id: string;
       number: number;
@@ -130,6 +142,11 @@ export async function fetchRecentSubmissions(after?: string) {
   const qs = after ? `?after=${encodeURIComponent(after)}` : "";
   const res = await fetch(`/api/submissions/recent${qs}`);
   return parseJson<MosaicSubmission[]>(res);
+}
+
+export async function fetchLeaderboard() {
+  const res = await fetch("/api/leaderboard");
+  return parseJson<{ entries: LeaderboardEntry[] }>(res);
 }
 
 export async function fetchAdminOverview(passcode: string) {

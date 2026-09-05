@@ -30,15 +30,21 @@
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
 }
 
 * {
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   min-height: 100dvh;
+  overscroll-behavior-y: contain;
 }
 
 #root {
@@ -67,19 +73,23 @@ body {
   }
 }
 
-@keyframes key-bob {
-  0%,
-  100% {
-    transform: translateY(0) rotate(-6deg);
+@keyframes feature-in {
+  from {
+    opacity: 0;
+    transform: scale(1.03);
   }
-  50% {
-    transform: translateY(-4px) rotate(-2deg);
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
-@keyframes trail-dash {
+@keyframes progress-bar {
+  from {
+    transform: scaleX(0);
+  }
   to {
-    stroke-dashoffset: -24;
+    transform: scaleX(1);
   }
 }
 
@@ -91,8 +101,13 @@ body {
   animation: mosaic-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.animate-key-bob {
-  animation: key-bob 2.4s ease-in-out infinite;
+.animate-feature-in {
+  animation: feature-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.feature-progress {
+  transform-origin: left center;
+  animation: progress-bar 6.5s linear both;
 }
 
 .bg-mesh {
@@ -102,7 +117,30 @@ body {
   background-size: 28px 28px;
 }
 
-.hunt-path {
-  stroke-dasharray: 6 6;
-  animation: trail-dash 1.2s linear infinite;
+.page-shell {
+  padding-top: max(1rem, env(safe-area-inset-top));
+  padding-right: max(1rem, env(safe-area-inset-right));
+  padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+  padding-left: max(1rem, env(safe-area-inset-left));
+}
+
+.sticky-cta {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  background: linear-gradient(
+    180deg,
+    rgba(255, 248, 232, 0) 0%,
+    rgba(255, 245, 244, 0.92) 28%,
+    rgba(238, 243, 251, 0.98) 100%
+  );
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }

@@ -1,12 +1,38 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { fetchLeaderboard, type LeaderboardEntry } from "../api";
 import { getStoredTeamId } from "../session";
+import { Leaderboard } from "../components/Leaderboard";
 import { SchoolLogo } from "../components/SchoolLogo";
 
 export function DonePage() {
-  const hasSession = Boolean(getStoredTeamId());
+  const teamId = getStoredTeamId();
+  const hasSession = Boolean(teamId);
+  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchLeaderboard()
+      .then((data) => {
+        if (!cancelled) setEntries(data.entries);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Failed to load leaderboard");
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const myRank = teamId
+    ? entries.find((entry) => entry.id === teamId)?.rank
+    : undefined;
 
   return (
-    <div className="bg-mesh mx-auto flex min-h-dvh max-w-lg flex-col items-center justify-center px-4 py-12 text-center">
+    <div className="bg-mesh mx-auto flex min-h-dvh max-w-lg flex-col items-center px-4 py-12 text-center">
       <SchoolLogo variant="navy" size="md" className="animate-fade-up" />
       <p className="animate-fade-up mt-5 text-xs font-semibold uppercase tracking-[0.22em] text-sp-red">
         Hunt complete
@@ -14,10 +40,30 @@ export function DonePage() {
       <h1 className="animate-fade-up mt-3 font-[family-name:var(--font-display)] text-4xl text-navy-950">
         You finished all 10!
       </h1>
+      {myRank != null ? (
+        <p className="animate-fade-up mt-3 font-[family-name:var(--font-display)] text-2xl text-navy-800">
+          Final place: #{myRank}
+        </p>
+      ) : null}
       <p className="animate-fade-up mt-4 max-w-sm text-navy-800/75">
         Head back to the gathering point and watch your photos land on the live
         mosaic. Nice work.
       </p>
+
+      <div className="mt-8 w-full text-left">
+        {error ? (
+          <p className="rounded-xl bg-red-50 px-3 py-2 text-center text-sm text-red-800">
+            {error}
+          </p>
+        ) : (
+          <Leaderboard
+            entries={entries}
+            highlightTeamId={teamId}
+            variant="light"
+          />
+        )}
+      </div>
+
       <div className="animate-fade-up mt-8 flex w-full flex-col gap-3">
         <Link
           to="/display"

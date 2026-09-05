@@ -6,6 +6,7 @@ import {
   LOCATION_COUNT,
   prisma,
 } from "../db.js";
+import { getLeaderboard } from "../leaderboard.js";
 import { uploadPhoto } from "../supabase.js";
 
 export const submissionsRouter = Router();
@@ -126,6 +127,7 @@ submissionsRouter.post("/", upload.single("photo"), async (req, res) => {
     });
 
     const { updatedTeam } = result;
+    const leaderboard = await getLeaderboard();
 
     if (isFinished(updatedTeam.currentStep)) {
       return res.json({
@@ -140,6 +142,7 @@ submissionsRouter.post("/", upload.single("photo"), async (req, res) => {
           currentStep: updatedTeam.currentStep,
           total: LOCATION_COUNT,
         },
+        leaderboard,
       });
     }
 
@@ -163,6 +166,7 @@ submissionsRouter.post("/", upload.single("photo"), async (req, res) => {
         currentStep: updatedTeam.currentStep,
         total: LOCATION_COUNT,
       },
+      leaderboard,
       nextQuestion: nextLocation
         ? {
             locationId: nextLocation.id,
