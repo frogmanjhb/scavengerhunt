@@ -1,8 +1,8 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { claimTeam, fetchTeams } from "../api";
-import { setStoredTeamId } from "../session";
-import { AppHeader } from "../components/AppHeader";
+import { claimTeam, fetchTeams } from "../../../api";
+import { setStoredTeamId } from "../../../session";
+import { AppHeader } from "../../../components/AppHeader";
 
 export function ClaimPage() {
   const { teamId } = useParams<{ teamId: string }>();
@@ -41,7 +41,7 @@ export function ClaimPage() {
     try {
       await claimTeam(teamId, name.trim());
       setStoredTeamId(teamId);
-      navigate("/play", { replace: true });
+      navigate("/hunt/play", { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not claim team");
     } finally {
@@ -95,7 +95,7 @@ export function ClaimPage() {
           </button>
 
           <Link
-            to="/"
+            to="/hunt"
             className="mt-3 flex min-h-12 items-center justify-center text-base text-navy-800/70 underline-offset-2 active:underline"
           >
             Back to team grid

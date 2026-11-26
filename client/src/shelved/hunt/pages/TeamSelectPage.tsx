@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { fetchTeams, type TeamSummary } from "../api";
-import { getStoredTeamId } from "../session";
-import { AppHeader } from "../components/AppHeader";
+import { fetchTeams, type TeamSummary } from "../../../api";
+import { getStoredTeamId } from "../../../session";
+import { AppHeader } from "../../../components/AppHeader";
 
 export function TeamSelectPage() {
   const navigate = useNavigate();
@@ -59,7 +59,7 @@ export function TeamSelectPage() {
               key={team.id}
               type="button"
               disabled={taken}
-              onClick={() => navigate(`/claim/${team.id}`)}
+              onClick={() => navigate(`/hunt/claim/${team.id}`)}
               style={{ animationDelay: `${Math.min(index, 12) * 30}ms` }}
               className={`animate-fade-up flex min-h-[6.5rem] flex-col items-center justify-center rounded-2xl px-2 py-4 text-center transition active:scale-[0.98] sm:min-h-[7rem] ${
                 taken
@@ -85,11 +85,11 @@ export function TeamSelectPage() {
 
       <p className="mt-8 pb-2 text-center text-sm text-navy-900/45">
         Organiser?{" "}
-        <Link to="/admin" className="underline underline-offset-2">
+        <Link to="/hunt/admin" className="underline underline-offset-2">
           Admin
         </Link>
         {" · "}
-        <Link to="/display" className="underline underline-offset-2">
+        <Link to="/hunt/display" className="underline underline-offset-2">
           Mosaic
         </Link>
       </p>

@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { fetchLeaderboard, type LeaderboardEntry } from "../api";
-import { getStoredTeamId } from "../session";
-import { Leaderboard } from "../components/Leaderboard";
-import { SchoolLogo } from "../components/SchoolLogo";
+import { fetchLeaderboard, type LeaderboardEntry } from "../../../api";
+import { getStoredTeamId } from "../../../session";
+import { Leaderboard } from "../../../components/Leaderboard";
+import { SchoolLogo } from "../../../components/SchoolLogo";
 
 export function DonePage() {
   const teamId = getStoredTeamId();
@@ -66,14 +66,14 @@ export function DonePage() {
 
       <div className="animate-fade-up mt-8 flex w-full flex-col gap-3">
         <Link
-          to="/display"
+          to="/hunt/display"
           className="flex min-h-12 items-center justify-center rounded-2xl bg-sp-red font-semibold text-white hover:bg-sp-red-dark"
         >
           Open mosaic display
         </Link>
         {hasSession ? (
           <Link
-            to="/"
+            to="/hunt"
             className="flex min-h-12 items-center justify-center rounded-2xl bg-white/85 font-semibold text-navy-900 ring-1 ring-navy-900/10"
           >
             Back to home

@@ -1,12 +1,10 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import {
-  adminReleaseTeam,
-  adminRenameTeam,
-  adminResetAll,
-  fetchAdminOverview,
-  setSubmissionHidden,
-  type AdminOverview,
+  fetchPartyAdminOverview,
+  reviewPartyPhoto,
+  type PartyAdminOverview,
+  type PartyPhotoStatus,
 } from "../api";
 import {
   clearStoredAdminPasscode,
@@ -15,18 +13,18 @@ import {
 } from "../session";
 import { SchoolLogo } from "../components/SchoolLogo";
 
-type AdminTab = "teams" | "photos";
+type Filter = "PENDING" | "APPROVED" | "DENIED" | "ALL";
 
 export function AdminPage() {
   const [passcode, setPasscode] = useState(getStoredAdminPasscode() || "");
   const [unlocked, setUnlocked] = useState(Boolean(getStoredAdminPasscode()));
-  const [overview, setOverview] = useState<AdminOverview | null>(null);
+  const [overview, setOverview] = useState<PartyAdminOverview | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [tab, setTab] = useState<AdminTab>("teams");
+  const [filter, setFilter] = useState<Filter>("PENDING");
 
   const refresh = useCallback(async (code: string) => {
-    const data = await fetchAdminOverview(code);
+    const data = await fetchPartyAdminOverview(code);
     setOverview(data);
   }, []);
 
@@ -43,7 +41,10 @@ export function AdminPage() {
       } catch (err) {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : "Admin refresh failed");
-          if (err instanceof Error && err.message.toLowerCase().includes("invalid")) {
+          if (
+            err instanceof Error &&
+            err.message.toLowerCase().includes("invalid")
+          ) {
             clearStoredAdminPasscode();
             setUnlocked(false);
           }
@@ -52,7 +53,7 @@ export function AdminPage() {
     }
 
     tick();
-    const interval = setInterval(tick, 5000);
+    const interval = setInterval(tick, 4000);
     return () => {
       cancelled = true;
       clearInterval(interval);
@@ -71,23 +72,37 @@ export function AdminPage() {
     }
   }
 
+  async function setStatus(id: string, status: PartyPhotoStatus) {
+    const code = getStoredAdminPasscode();
+    if (!code) return;
+    setBusyId(id);
+    setError(null);
+    try {
+      await reviewPartyPhoto(code, id, status);
+      await refresh(code);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Update failed");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
   if (!unlocked) {
     return (
-      <div className="page-shell bg-mesh mx-auto flex min-h-dvh max-w-md items-center">
+      <div className="page-shell bg-party-mesh mx-auto flex min-h-dvh max-w-md items-center">
         <form
           onSubmit={onUnlock}
           className="w-full rounded-3xl bg-white/90 p-5 shadow-sm ring-2 ring-sp-red/10 sm:p-6"
         >
           <SchoolLogo variant="navy" size="sm" className="mx-auto" />
           <h1 className="mt-4 text-center font-[family-name:var(--font-display)] text-2xl text-navy-950">
-            Organiser access
+            Party organiser
           </h1>
           <p className="mt-2 text-center text-sm text-navy-800/70">
-            Enter the shared admin passcode to unlock live oversight.
+            Approve photos before they appear on the display stream.
           </p>
           <input
             type="password"
-            inputMode="numeric"
             autoComplete="current-password"
             value={passcode}
             onChange={(e) => setPasscode(e.target.value)}
@@ -109,18 +124,21 @@ export function AdminPage() {
     );
   }
 
-  const claimedCount = overview?.teams.filter((t) => t.claimed).length ?? 0;
+  const photos =
+    overview?.photos.filter((p) =>
+      filter === "ALL" ? true : p.status === filter,
+    ) ?? [];
 
   return (
-    <div className="page-shell bg-mesh mx-auto min-h-dvh max-w-3xl pb-8">
+    <div className="page-shell bg-party-mesh mx-auto min-h-dvh max-w-3xl pb-8">
       <div className="mb-4 flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           <SchoolLogo variant="navy" size="sm" className="shrink-0" />
           <div className="min-w-0">
             <h1 className="font-[family-name:var(--font-display)] text-2xl text-navy-950 sm:text-3xl">
-              Admin
+              Photo approvals
             </h1>
-            <p className="text-sm text-navy-800/70">Live progress</p>
+            <p className="text-sm text-navy-800/70">Christmas party stream</p>
           </div>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-2">
@@ -128,36 +146,8 @@ export function AdminPage() {
             to="/display"
             className="inline-flex min-h-11 items-center rounded-xl bg-navy-900 px-3 text-sm font-semibold text-white"
           >
-            Mosaic
+            Open display
           </Link>
-          <button
-            type="button"
-            disabled={busyId === "reset-all"}
-            onClick={async () => {
-              if (
-                !window.confirm(
-                  "Reset the entire hunt? This clears all photos, releases every team, and resets all progress. This cannot be undone.",
-                )
-              ) {
-                return;
-              }
-              setBusyId("reset-all");
-              setError(null);
-              try {
-                await adminResetAll(getStoredAdminPasscode()!);
-                await refresh(getStoredAdminPasscode()!);
-              } catch (err) {
-                setError(
-                  err instanceof Error ? err.message : "Reset failed",
-                );
-              } finally {
-                setBusyId(null);
-              }
-            }}
-            className="inline-flex min-h-11 items-center rounded-xl bg-sp-red/10 px-3 text-sm font-semibold text-sp-red-dark disabled:opacity-50"
-          >
-            {busyId === "reset-all" ? "Resetting…" : "Reset all"}
-          </button>
           <button
             type="button"
             onClick={() => {
@@ -180,217 +170,119 @@ export function AdminPage() {
       {overview ? (
         <>
           <div className="mb-4 grid grid-cols-3 gap-2">
-            <Stat
-              label="Done"
-              value={`${overview.finishedCount}/${overview.totalTeams}`}
-            />
-            <Stat label="Claimed" value={String(claimedCount)} />
-            <Stat
-              label="Photos"
-              value={String(overview.recentSubmissions.length)}
-            />
+            <Stat label="Pending" value={String(overview.counts.PENDING)} />
+            <Stat label="Live" value={String(overview.counts.APPROVED)} />
+            <Stat label="Denied" value={String(overview.counts.DENIED)} />
           </div>
 
-          <div className="mb-4 grid grid-cols-2 gap-2 rounded-2xl bg-navy-900/8 p-1.5">
-            <TabButton
-              active={tab === "teams"}
-              onClick={() => setTab("teams")}
-              label="Teams"
-            />
-            <TabButton
-              active={tab === "photos"}
-              onClick={() => setTab("photos")}
-              label="Photos"
-            />
+          <div className="mb-4 grid grid-cols-4 gap-1.5 rounded-2xl bg-navy-900/8 p-1.5">
+            {(
+              [
+                ["PENDING", "Queue"],
+                ["APPROVED", "Live"],
+                ["DENIED", "Denied"],
+                ["ALL", "All"],
+              ] as const
+            ).map(([key, label]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setFilter(key)}
+                className={`min-h-11 rounded-xl text-xs font-semibold sm:text-sm ${
+                  filter === key
+                    ? "bg-white text-navy-950 shadow-sm"
+                    : "text-navy-800/65"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
           </div>
 
-          {tab === "teams" ? (
-            <section className="space-y-3">
-              {overview.teams.map((team) => (
+          <section className="space-y-3">
+            {photos.length === 0 ? (
+              <p className="rounded-2xl bg-white/70 px-4 py-8 text-center text-navy-800/60">
+                {filter === "PENDING"
+                  ? "No photos waiting for approval."
+                  : "Nothing in this list."}
+              </p>
+            ) : (
+              photos.map((photo) => (
                 <article
-                  key={team.id}
-                  className="rounded-2xl bg-white/90 p-4 ring-1 ring-navy-900/10"
+                  key={photo.id}
+                  className="overflow-hidden rounded-2xl bg-white/90 ring-1 ring-navy-900/10"
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="font-[family-name:var(--font-display)] text-xl text-navy-950">
-                        #{team.number}
-                      </p>
-                      <p className="truncate font-medium text-navy-900/85">
-                        {team.name || (team.claimed ? "Unnamed" : "Unclaimed")}
-                      </p>
-                      <p className="mt-1 text-sm text-navy-900/55">
-                        {team.claimed
-                          ? `${team.completed}/10${team.finished ? " · finished" : ""}`
-                          : "Available"}
-                      </p>
+                  <img
+                    src={photo.photoUrl}
+                    alt={photo.staffName}
+                    className={`aspect-[16/10] w-full object-cover ${
+                      photo.status === "DENIED" ? "opacity-50" : ""
+                    }`}
+                  />
+                  <div className="p-4">
+                    <div className="flex items-start justify-between gap-2">
+                      <PhotoTitle name={photo.staffName} />
+                      <StatusBadge status={photo.status} />
                     </div>
-                    {team.claimed ? (
-                      <div className="h-2.5 w-16 overflow-hidden rounded-full bg-navy-900/10">
-                        <div
-                          className="h-full rounded-full bg-sp-red"
-                          style={{ width: `${(team.completed / 10) * 100}%` }}
-                        />
-                      </div>
+                    {photo.caption ? (
+                      <p className="mt-2 text-sm text-navy-800/75">
+                        {photo.caption}
+                      </p>
                     ) : null}
-                  </div>
+                    <p className="mt-1 text-xs text-navy-800/45">
+                      {new Date(photo.createdAt).toLocaleString()}
+                    </p>
 
-                  {team.claimed ? (
                     <div className="mt-4 grid grid-cols-2 gap-2">
-                      <button
-                        type="button"
-                        disabled={busyId === team.id}
-                        onClick={async () => {
-                          const next = window.prompt(
-                            `Rename team ${team.number}`,
-                            team.name || "",
-                          );
-                          if (!next?.trim()) return;
-                          setBusyId(team.id);
-                          try {
-                            await adminRenameTeam(
-                              getStoredAdminPasscode()!,
-                              team.id,
-                              next.trim(),
-                            );
-                            await refresh(getStoredAdminPasscode()!);
-                          } catch (err) {
-                            setError(
-                              err instanceof Error
-                                ? err.message
-                                : "Rename failed",
-                            );
-                          } finally {
-                            setBusyId(null);
-                          }
-                        }}
-                        className="min-h-12 rounded-xl bg-navy-900/8 text-base font-semibold text-navy-900 active:bg-navy-900/15"
-                      >
-                        Rename
-                      </button>
-                      <button
-                        type="button"
-                        disabled={busyId === team.id}
-                        onClick={async () => {
-                          if (
-                            !window.confirm(
-                              `Release team ${team.number}? It will become claimable again.`,
-                            )
-                          ) {
-                            return;
-                          }
-                          setBusyId(team.id);
-                          try {
-                            await adminReleaseTeam(
-                              getStoredAdminPasscode()!,
-                              team.id,
-                            );
-                            await refresh(getStoredAdminPasscode()!);
-                          } catch (err) {
-                            setError(
-                              err instanceof Error
-                                ? err.message
-                                : "Release failed",
-                            );
-                          } finally {
-                            setBusyId(null);
-                          }
-                        }}
-                        className="min-h-12 rounded-xl bg-sp-gold/40 text-base font-semibold text-navy-950 active:bg-sp-gold/55"
-                      >
-                        Release
-                      </button>
+                      {photo.status !== "APPROVED" ? (
+                        <button
+                          type="button"
+                          disabled={busyId === photo.id}
+                          onClick={() => setStatus(photo.id, "APPROVED")}
+                          className="min-h-12 rounded-xl bg-emerald-700 text-base font-semibold text-white disabled:opacity-50"
+                        >
+                          Approve
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled={busyId === photo.id}
+                          onClick={() => setStatus(photo.id, "PENDING")}
+                          className="min-h-12 rounded-xl bg-navy-900/8 text-base font-semibold text-navy-900 disabled:opacity-50"
+                        >
+                          Remove from stream
+                        </button>
+                      )}
+                      {photo.status !== "DENIED" ? (
+                        <button
+                          type="button"
+                          disabled={busyId === photo.id}
+                          onClick={() => setStatus(photo.id, "DENIED")}
+                          className="min-h-12 rounded-xl bg-sp-red/15 text-base font-semibold text-sp-red-dark disabled:opacity-50"
+                        >
+                          Deny
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled={busyId === photo.id}
+                          onClick={() => setStatus(photo.id, "PENDING")}
+                          className="min-h-12 rounded-xl bg-navy-900/8 text-base font-semibold text-navy-900 disabled:opacity-50"
+                        >
+                          Back to queue
+                        </button>
+                      )}
                     </div>
-                  ) : null}
+                  </div>
                 </article>
-              ))}
-            </section>
-          ) : (
-            <section className="space-y-3">
-              {overview.recentSubmissions.length === 0 ? (
-                <p className="rounded-2xl bg-white/70 px-4 py-8 text-center text-navy-800/60">
-                  No photos yet.
-                </p>
-              ) : (
-                overview.recentSubmissions.map((sub) => (
-                  <article
-                    key={sub.id}
-                    className="overflow-hidden rounded-2xl bg-white/90 ring-1 ring-navy-900/10"
-                  >
-                    <img
-                      src={sub.photoUrl}
-                      alt={sub.teamName}
-                      className={`aspect-[16/10] w-full object-cover ${sub.hidden ? "opacity-40" : ""}`}
-                    />
-                    <div className="p-4">
-                      <p className="text-lg font-semibold text-navy-950">
-                        {sub.teamName}
-                      </p>
-                      <p className="text-sm text-navy-900/55">
-                        Spot {sub.locationOrderIndex + 1}
-                        {sub.hidden ? " · hidden from mosaic" : ""}
-                      </p>
-                      <button
-                        type="button"
-                        disabled={busyId === sub.id}
-                        onClick={async () => {
-                          setBusyId(sub.id);
-                          try {
-                            await setSubmissionHidden(
-                              getStoredAdminPasscode()!,
-                              sub.id,
-                              !sub.hidden,
-                            );
-                            await refresh(getStoredAdminPasscode()!);
-                          } catch (err) {
-                            setError(
-                              err instanceof Error
-                                ? err.message
-                                : "Update failed",
-                            );
-                          } finally {
-                            setBusyId(null);
-                          }
-                        }}
-                        className="mt-3 flex min-h-12 w-full items-center justify-center rounded-xl bg-sp-red text-base font-semibold text-white active:bg-sp-red-dark"
-                      >
-                        {sub.hidden ? "Unhide" : "Hide from mosaic"}
-                      </button>
-                    </div>
-                  </article>
-                ))
-              )}
-            </section>
-          )}
+              ))
+            )}
+          </section>
         </>
       ) : (
-        <p className="text-navy-800/70">Loading overview…</p>
+        <p className="text-navy-800/70">Loading…</p>
       )}
     </div>
-  );
-}
-
-function TabButton({
-  active,
-  onClick,
-  label,
-}: {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`min-h-12 rounded-xl text-base font-semibold transition ${
-        active
-          ? "bg-white text-navy-950 shadow-sm"
-          : "text-navy-800/65 active:bg-white/50"
-      }`}
-    >
-      {label}
-    </button>
   );
 }
 
@@ -404,5 +296,31 @@ function Stat({ label, value }: { label: string; value: string }) {
         {value}
       </p>
     </div>
+  );
+}
+
+function PhotoTitle({ name }: { name: string }) {
+  return (
+    <p className="text-lg font-semibold text-navy-950">{name}</p>
+  );
+}
+
+function StatusBadge({ status }: { status: PartyPhotoStatus }) {
+  const styles: Record<PartyPhotoStatus, string> = {
+    PENDING: "bg-amber-100 text-amber-900",
+    APPROVED: "bg-emerald-100 text-emerald-900",
+    DENIED: "bg-red-100 text-red-900",
+  };
+  const labels: Record<PartyPhotoStatus, string> = {
+    PENDING: "Pending",
+    APPROVED: "On stream",
+    DENIED: "Denied",
+  };
+  return (
+    <span
+      className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${styles[status]}`}
+    >
+      {labels[status]}
+    </span>
   );
 }

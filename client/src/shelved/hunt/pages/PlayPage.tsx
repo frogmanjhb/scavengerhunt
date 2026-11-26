@@ -5,12 +5,12 @@ import {
   uploadSubmission,
   type LeaderboardEntry,
   type QuestionPayload,
-} from "../api";
-import { compressPhoto } from "../compress";
-import { clearStoredTeamId, getStoredTeamId } from "../session";
-import { ConfettiBurst } from "../components/ConfettiBurst";
-import { Leaderboard } from "../components/Leaderboard";
-import { SchoolLogo } from "../components/SchoolLogo";
+} from "../../../api";
+import { compressPhoto } from "../../../compress";
+import { clearStoredTeamId, getStoredTeamId } from "../../../session";
+import { ConfettiBurst } from "../../../components/ConfettiBurst";
+import { Leaderboard } from "../../../components/Leaderboard";
+import { SchoolLogo } from "../../../components/SchoolLogo";
 
 type UploadState = "idle" | "compressing" | "uploading" | "accepted" | "error";
 
@@ -35,7 +35,7 @@ export function PlayPage() {
     setTeamName(data.team.name || `Team ${data.team.number}`);
     setTeamNumber(data.team.number);
     if (data.finished) {
-      navigate("/done", { replace: true });
+      navigate("/hunt/done", { replace: true });
       return;
     }
     setQuestion(data.question);
@@ -44,7 +44,7 @@ export function PlayPage() {
 
   useEffect(() => {
     if (!teamId) {
-      navigate("/", { replace: true });
+      navigate("/hunt", { replace: true });
       return;
     }
     loadQuestion().catch((err) =>
@@ -73,7 +73,7 @@ export function PlayPage() {
       setUploadState("accepted");
 
       if (result.finished) {
-        setTimeout(() => navigate("/done", { replace: true }), 3200);
+        setTimeout(() => navigate("/hunt/done", { replace: true }), 3200);
         return;
       }
 
@@ -199,14 +199,14 @@ export function PlayPage() {
         type="button"
         onClick={() => {
           clearStoredTeamId();
-          navigate("/");
+          navigate("/hunt");
         }}
         className="mt-8 block w-full text-center text-xs text-navy-900/45 underline-offset-2 hover:underline"
       >
         Switch device / leave session
       </button>
       <p className="mt-2 text-center text-xs text-navy-900/40">
-        <Link to="/">Team grid</Link>
+        <Link to="/hunt">Team grid</Link>
       </p>
     </div>
   );

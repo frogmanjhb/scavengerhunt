@@ -1,3 +1,23 @@
+export type PartyPhotoStatus = "PENDING" | "APPROVED" | "DENIED";
+
+export type PartyStreamPhoto = {
+  id: string;
+  photoUrl: string;
+  caption: string | null;
+  staffName: string;
+  status: PartyPhotoStatus;
+  createdAt: string;
+};
+
+export type PartyAdminOverview = {
+  counts: Record<PartyPhotoStatus, number>;
+  photos: Array<
+    PartyStreamPhoto & {
+      reviewedAt: string | null;
+    }
+  >;
+};
+
 export type TeamSummary = {
   id: string;
   number: number;
@@ -93,6 +113,60 @@ async function parseJson<T>(res: Response): Promise<T> {
   }
   return data as T;
 }
+
+export async function uploadPartyPhoto(
+  staffName: string,
+  caption: string,
+  photo: Blob,
+) {
+  const form = new FormData();
+  form.append("staffName", staffName);
+  if (caption) form.append("caption", caption);
+  form.append("photo", photo, "photo.jpg");
+  const res = await fetch("/api/party", {
+    method: "POST",
+    body: form,
+  });
+  return parseJson<{ ok: boolean; message: string; photo: PartyStreamPhoto }>(
+    res,
+  );
+}
+
+export async function fetchApprovedPartyStream(after?: string) {
+  const qs = after ? `?after=${encodeURIComponent(after)}` : "";
+  const res = await fetch(`/api/party/stream${qs}`);
+  return parseJson<PartyStreamPhoto[]>(res);
+}
+
+export async function fetchAllApprovedPartyPhotos() {
+  const res = await fetch("/api/party/stream/all-approved");
+  return parseJson<PartyStreamPhoto[]>(res);
+}
+
+export async function fetchPartyAdminOverview(passcode: string) {
+  const res = await fetch("/api/party/admin/overview", {
+    headers: { "X-Admin-Passcode": passcode },
+  });
+  return parseJson<PartyAdminOverview>(res);
+}
+
+export async function reviewPartyPhoto(
+  passcode: string,
+  id: string,
+  status: PartyPhotoStatus,
+) {
+  const res = await fetch(`/api/party/admin/photos/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Admin-Passcode": passcode,
+    },
+    body: JSON.stringify({ status }),
+  });
+  return parseJson(res);
+}
+
+// --- Shelved scavenger hunt API ---
 
 export async function fetchTeams() {
   const res = await fetch("/api/teams");

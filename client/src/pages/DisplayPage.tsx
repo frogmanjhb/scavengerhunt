@@ -1,18 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  fetchLeaderboard,
-  fetchRecentSubmissions,
-  type LeaderboardEntry,
-  type MosaicSubmission,
+  fetchAllApprovedPartyPhotos,
+  fetchApprovedPartyStream,
+  type PartyStreamPhoto,
 } from "../api";
-import { Leaderboard } from "../components/Leaderboard";
 import { SchoolLogo } from "../components/SchoolLogo";
 
-const FEATURE_MS = 6500;
+const FEATURE_MS = 7000;
 
 export function DisplayPage() {
-  const [items, setItems] = useState<MosaicSubmission[]>([]);
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [items, setItems] = useState<PartyStreamPhoto[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [order, setOrder] = useState<string[]>([]);
   const [cursor, setCursor] = useState(0);
@@ -30,17 +27,8 @@ export function DisplayPage() {
   useEffect(() => {
     let cancelled = false;
 
-    async function pollLeaderboard() {
-      try {
-        const data = await fetchLeaderboard();
-        if (!cancelled) setLeaderboard(data.entries);
-      } catch {
-        // Keep last good leaderboard; mosaic errors surface separately.
-      }
-    }
-
-    async function reconcileHidden() {
-      const all = await fetchRecentSubmissions();
+    async function reconcile() {
+      const all = await fetchAllApprovedPartyPhotos();
       if (cancelled) return;
       const visibleIds = new Set(all.map((item) => item.id));
       knownIds.current = visibleIds;
@@ -61,11 +49,10 @@ export function DisplayPage() {
     async function poll() {
       try {
         pollCount.current += 1;
-        await pollLeaderboard();
         if (pollCount.current === 1 || pollCount.current % 8 === 0) {
-          await reconcileHidden();
+          await reconcile();
         } else {
-          const batch = await fetchRecentSubmissions(
+          const batch = await fetchApprovedPartyStream(
             afterRef.current || undefined,
           );
           if (cancelled) return;
@@ -82,20 +69,19 @@ export function DisplayPage() {
         setError(null);
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Mosaic poll failed");
+          setError(err instanceof Error ? err.message : "Display poll failed");
         }
       }
     }
 
     poll();
-    const interval = setInterval(poll, 4000);
+    const interval = setInterval(poll, 3500);
     return () => {
       cancelled = true;
       clearInterval(interval);
     };
   }, []);
 
-  // Fair rotation: round-robin all photos; newcomers get the next spotlight.
   useEffect(() => {
     const ids = items.map((item) => item.id);
     setOrder((prev) => {
@@ -130,13 +116,13 @@ export function DisplayPage() {
   }, [order.length]);
 
   const byId = useMemo(() => {
-    const map = new Map<string, MosaicSubmission>();
+    const map = new Map<string, PartyStreamPhoto>();
     for (const item of items) map.set(item.id, item);
     return map;
   }, [items]);
 
   const featuredId = order.length > 0 ? order[cursor % order.length] : null;
-  const featured = featuredId ? byId.get(featuredId) ?? null : null;
+  const featured = featuredId ? (byId.get(featuredId) ?? null) : null;
 
   useEffect(() => {
     if (!featuredId || !stripRef.current) return;
@@ -145,12 +131,10 @@ export function DisplayPage() {
     );
     el?.scrollIntoView({
       behavior: "smooth",
-      inline: "center",
       block: "nearest",
     });
   }, [featuredId]);
 
-  // Preload the next couple of images for smoother projector cycling.
   useEffect(() => {
     if (order.length < 2) return;
     for (let i = 1; i <= 2; i += 1) {
@@ -169,32 +153,24 @@ export function DisplayPage() {
     setTick((t) => t + 1);
   }
 
-  const board = (
-    <Leaderboard
-      entries={leaderboard}
-      variant="display"
-      className="h-full w-full"
-    />
-  );
-
   return (
     <div className="flex min-h-dvh flex-col bg-navy-950 text-white lg:h-dvh lg:overflow-hidden">
       <header className="relative shrink-0 overflow-hidden px-4 py-3 sm:px-6 sm:py-4">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(230,30,38,0.35),transparent_40%),radial-gradient(circle_at_80%_0%,rgba(245,197,24,0.22),transparent_45%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(220,38,38,0.35),transparent_42%),radial-gradient(circle_at_85%_10%,rgba(34,197,94,0.2),transparent_45%),radial-gradient(circle_at_50%_100%,rgba(245,197,24,0.15),transparent_50%)]" />
         <div className="relative flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
             <SchoolLogo variant="white" size="sm" className="shrink-0" />
             <div className="min-w-0">
               <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-sp-gold sm:text-xs">
-                Live mosaic
+                Staff Christmas party
               </p>
               <h1 className="truncate font-[family-name:var(--font-display)] text-lg leading-tight sm:text-2xl lg:text-3xl">
-                The One Where We Had A Scavenger Hunt
+                Live photo stream
               </h1>
             </div>
           </div>
           <p className="shrink-0 text-xs text-white/55 sm:text-sm">
-            {items.length} photos
+            {items.length} approved
           </p>
         </div>
         {error ? (
@@ -203,20 +179,21 @@ export function DisplayPage() {
       </header>
 
       {items.length === 0 ? (
-        <div className="relative flex flex-1 items-center justify-center px-4 py-8">
+        <div className="relative flex flex-1 flex-col items-center justify-center px-6 py-12 text-center">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(245,197,24,0.12),transparent_55%)]" />
-          <div className="relative w-full max-w-md">
-            {leaderboard.length === 0 ? (
-              <p className="mb-4 text-center text-white/55">
-                Waiting for the first photos…
-              </p>
-            ) : null}
-            {board}
-          </div>
+          <p className="relative text-5xl" aria-hidden>
+            🎄
+          </p>
+          <p className="relative mt-4 max-w-md text-lg text-white/70">
+            Waiting for the first approved photos…
+          </p>
+          <p className="relative mt-2 text-sm text-white/45">
+            Staff upload from the party link · organisers approve in admin
+          </p>
         </div>
       ) : (
         <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-          <section className="relative flex min-h-[42dvh] flex-col lg:min-h-0 lg:flex-1">
+          <section className="relative flex min-h-[50dvh] flex-col lg:min-h-0 lg:flex-1">
             {featured ? (
               <div
                 key={`${featured.id}-${tick}`}
@@ -225,50 +202,39 @@ export function DisplayPage() {
                 <div className="relative min-h-0 flex-1 bg-black">
                   <img
                     src={featured.photoUrl}
-                    alt={featured.teamName}
+                    alt={featured.staffName}
                     className="animate-feature-in absolute inset-0 h-full w-full object-contain"
                   />
-                  <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-navy-950/90 via-navy-950/40 to-transparent px-4 pb-4 pt-16 sm:px-6 sm:pb-5">
-                    <p className="font-[family-name:var(--font-display)] text-2xl text-sp-gold sm:text-3xl lg:text-4xl">
-                      {featured.teamName}
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-navy-950/95 via-navy-950/45 to-transparent px-4 pb-4 pt-20 sm:px-8 sm:pb-6">
+                    <p className="font-[family-name:var(--font-display)] text-2xl text-sp-gold sm:text-4xl lg:text-5xl">
+                      {featured.staffName}
                     </p>
                     {featured.caption ? (
-                      <p className="mt-1 max-w-3xl text-sm text-white/75 sm:text-base">
+                      <p className="mt-2 max-w-4xl text-base text-white/80 sm:text-xl">
                         {featured.caption}
                       </p>
                     ) : null}
-                    <p className="mt-2 text-xs text-white/45">
-                      Spotlight {(cursor % order.length) + 1} of {order.length}
-                    </p>
                   </div>
                 </div>
-                <div className="h-1 w-full bg-white/10">
+                <div className="h-1.5 w-full bg-white/10">
                   <div
                     key={tick}
-                    className="feature-progress h-full bg-sp-gold"
+                    className="party-feature-progress h-full bg-sp-gold"
                   />
                 </div>
               </div>
             ) : null}
           </section>
 
-          {/* Center leaderboard — between spotlight and photo grid */}
-          <div className="relative z-10 flex shrink-0 items-stretch justify-center border-y border-white/10 bg-navy-950/40 px-3 py-3 lg:w-[min(22rem,30vw)] lg:border-x lg:border-y-0 lg:px-4 lg:py-4">
-            <div className="flex w-full max-w-md flex-col lg:max-w-none">
-              {board}
-            </div>
-          </div>
-
-          <aside className="flex shrink-0 flex-col border-t border-white/10 lg:w-[min(20rem,28vw)] lg:border-l lg:border-t-0">
-            <p className="px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/45 sm:px-3">
-              All photos · tap to spotlight
+          <aside
+            ref={stripRef}
+            className="flex shrink-0 flex-col border-t border-white/10 lg:w-[min(22rem,26vw)] lg:border-l lg:border-t-0"
+          >
+            <p className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/45">
+              Up next
             </p>
-
-            <div
-              ref={stripRef}
-              className="no-scrollbar flex gap-2 overflow-x-auto px-4 pb-3 lg:hidden"
-            >
-              {order.map((id) => {
+            <div className="no-scrollbar flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overscroll-contain px-3 pb-4">
+              {order.map((id, index) => {
                 const item = byId.get(id);
                 if (!item) return null;
                 const active = id === featuredId;
@@ -278,85 +244,24 @@ export function DisplayPage() {
                     type="button"
                     data-photo-id={id}
                     onClick={() => showPhoto(id)}
-                    className={`relative h-20 w-20 shrink-0 overflow-hidden rounded-xl ring-2 transition ${
+                    className={`flex shrink-0 items-center gap-3 rounded-xl p-2 text-left ring-2 transition ${
                       active
-                        ? "ring-sp-gold"
-                        : "ring-white/15 opacity-80 active:opacity-100"
+                        ? "bg-white/10 ring-sp-gold"
+                        : "ring-transparent hover:bg-white/5"
                     }`}
                   >
                     <img
                       src={item.photoUrl}
-                      alt={item.teamName}
-                      className="h-full w-full object-cover"
+                      alt=""
+                      className="h-16 w-16 shrink-0 rounded-lg object-cover"
                       loading="lazy"
                     />
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="hidden min-h-0 flex-1 overflow-y-auto overscroll-contain p-3 lg:block">
-              <div className="grid grid-cols-2 gap-2">
-                {order.map((id, index) => {
-                  const item = byId.get(id);
-                  if (!item) return null;
-                  const active = id === featuredId;
-                  return (
-                    <button
-                      key={id}
-                      type="button"
-                      data-photo-id={id}
-                      onClick={() => showPhoto(id)}
-                      className={`animate-mosaic-in overflow-hidden rounded-xl text-left ring-2 transition ${
-                        active
-                          ? "ring-sp-gold"
-                          : "ring-white/10 hover:ring-white/30"
-                      }`}
-                      style={{
-                        animationDelay: `${Math.min(index % 10, 9) * 30}ms`,
-                      }}
-                    >
-                      <img
-                        src={item.photoUrl}
-                        alt={item.teamName}
-                        className="aspect-square w-full object-cover"
-                        loading="lazy"
-                      />
-                      <p className="truncate bg-navy-900/80 px-2 py-1.5 text-xs text-sp-gold">
-                        {item.teamName}
-                      </p>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 px-4 pb-4 lg:hidden">
-              {order.map((id, index) => {
-                const item = byId.get(id);
-                if (!item) return null;
-                const active = id === featuredId;
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => showPhoto(id)}
-                    className={`animate-mosaic-in overflow-hidden rounded-xl text-left ring-2 ${
-                      active ? "ring-sp-gold" : "ring-white/10"
-                    }`}
-                    style={{
-                      animationDelay: `${Math.min(index % 8, 7) * 30}ms`,
-                    }}
-                  >
-                    <img
-                      src={item.photoUrl}
-                      alt={item.teamName}
-                      className="aspect-[4/3] w-full object-cover"
-                      loading="lazy"
+                    <StreamPreviewMeta
+                      name={item.staffName}
+                      caption={item.caption}
+                      index={index}
+                      total={order.length}
                     />
-                    <p className="truncate bg-navy-900/80 px-2 py-1.5 text-xs text-sp-gold">
-                      {item.teamName}
-                    </p>
                   </button>
                 );
               })}
@@ -364,6 +269,30 @@ export function DisplayPage() {
           </aside>
         </div>
       )}
+    </div>
+  );
+}
+
+function StreamPreviewMeta({
+  name,
+  caption,
+  index,
+  total,
+}: {
+  name: string;
+  caption: string | null;
+  index: number;
+  total: number;
+}) {
+  return (
+    <div className="min-w-0 flex-1">
+      <p className="truncate font-semibold text-sp-gold">{name}</p>
+      {caption ? (
+        <p className="line-clamp-2 text-xs text-white/60">{caption}</p>
+      ) : null}
+      <p className="mt-1 text-[10px] text-white/35">
+        {index + 1} / {total}
+      </p>
     </div>
   );
 }

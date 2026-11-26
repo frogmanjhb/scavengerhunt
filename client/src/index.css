@@ -157,6 +157,20 @@ body {
   animation: progress-bar 6.5s linear both;
 }
 
+.party-feature-progress {
+  transform-origin: left center;
+  animation: progress-bar 7s linear both;
+}
+
+.bg-party-mesh {
+  background-image:
+    radial-gradient(900px 400px at 0% 0%, rgba(220, 38, 38, 0.08), transparent 55%),
+    radial-gradient(800px 380px at 100% 5%, rgba(34, 197, 94, 0.1), transparent 50%),
+    linear-gradient(rgba(18, 37, 71, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(18, 37, 71, 0.03) 1px, transparent 1px);
+  background-size: auto, auto, 28px 28px, 28px 28px;
+}
+
 .bg-mesh {
   background-image:
     linear-gradient(rgba(18, 37, 71, 0.035) 1px, transparent 1px),
