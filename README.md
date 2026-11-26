@@ -41,6 +41,14 @@ npx prisma migrate deploy
 # or locally: npx prisma db push
 ```
 
+If Railway shows **P3009** / `PartyPhotoStatus already exists`, redeploy after pulling latest `main` (startup runs `recover-party-migration.mjs`). To fix manually in Railway **Console**:
+
+```bash
+cd server
+npx prisma migrate resolve --applied 20260327120000_party_photos
+# use --rolled-back instead if PartyPhoto table does not exist, then redeploy
+```
+
 ## Local dev
 
 ```bash

@@ -1,8 +1,12 @@
--- CreateEnum
-CREATE TYPE "PartyPhotoStatus" AS ENUM ('PENDING', 'APPROVED', 'DENIED');
+-- CreateEnum (idempotent — production may already have this from db push or a partial apply)
+DO $$ BEGIN
+    CREATE TYPE "PartyPhotoStatus" AS ENUM ('PENDING', 'APPROVED', 'DENIED');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- CreateTable
-CREATE TABLE "PartyPhoto" (
+CREATE TABLE IF NOT EXISTS "PartyPhoto" (
     "id" TEXT NOT NULL,
     "photoUrl" TEXT NOT NULL,
     "caption" TEXT,
