@@ -12,6 +12,12 @@ import { SchoolLogo } from "../components/SchoolLogo";
 
 type Step = "form" | "compressing" | "uploading" | "done" | "error";
 
+const PARTY_CHARACTERS = [
+  { src: "/characters/festive-elephant.png", alt: "Elephant with a Christmas gift" },
+  { src: "/characters/festive-warthog.png", alt: "Warthog in a Santa hat" },
+  { src: "/characters/festive-springbok.webp", alt: "Springbok leaping with jingle bells" },
+] as const;
+
 export function UploadPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [staffName, setStaffName] = useState("");
@@ -92,6 +98,22 @@ export function UploadPage() {
           Snap a selfie or party pic. An organiser approves it before it hits the
           big screen.
         </p>
+        <div className="mt-5 overflow-hidden rounded-2xl bg-navy-950 shadow-sm ring-1 ring-navy-900/20">
+          <div className="flex items-end justify-center gap-0 bg-[radial-gradient(circle_at_50%_100%,rgba(245,197,24,0.12),transparent_55%)] px-1 pb-1 pt-2">
+            {PARTY_CHARACTERS.map((character) => (
+              <img
+                key={character.src}
+                src={character.src}
+                alt={character.alt}
+                width={160}
+                height={160}
+                className="h-[5.5rem] w-auto max-w-[34%] flex-1 object-contain object-bottom sm:h-[7rem]"
+                loading="eager"
+                decoding="async"
+              />
+            ))}
+          </div>
+        </div>
       </header>
 
       {step === "done" ? (
@@ -151,7 +173,6 @@ export function UploadPage() {
               ref={fileInputRef}
               type="file"
               accept="image/*"
-              capture="environment"
               className="sr-only"
               onChange={onFileChange}
             />
@@ -174,7 +195,7 @@ export function UploadPage() {
                 <span className="text-3xl" aria-hidden>
                   📷
                 </span>
-                <span className="text-base font-semibold">Take or choose photo</span>
+                <span className="text-base font-semibold">Take photo or upload from device</span>
               </button>
             )}
 
@@ -196,13 +217,15 @@ export function UploadPage() {
             </p>
           ) : null}
 
-          <button
-            type="submit"
-            disabled={!selectedFile || !staffName.trim() || busy}
-            className="sticky-cta flex min-h-14 w-full items-center justify-center rounded-2xl bg-sp-red text-lg font-semibold text-white shadow-lg disabled:opacity-45"
-          >
-            {step === "uploading" ? "Uploading…" : "Send to the photo wall"}
-          </button>
+          <div className="sticky-cta -mx-1 px-1 pt-2">
+            <button
+              type="submit"
+              disabled={!selectedFile || !staffName.trim() || busy}
+              className="flex min-h-16 w-full items-center justify-center rounded-2xl bg-sp-red px-4 text-xl font-bold tracking-tight text-white shadow-[0_8px_28px_rgba(230,30,38,0.5)] ring-2 ring-sp-red-dark/40 enabled:active:bg-sp-red-dark disabled:bg-navy-900/15 disabled:text-navy-950 disabled:shadow-none disabled:ring-1 disabled:ring-navy-900/20"
+            >
+              {step === "uploading" ? "Uploading…" : "Send to the photo wall"}
+            </button>
+          </div>
         </form>
       )}
 
